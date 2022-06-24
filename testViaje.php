@@ -2,8 +2,9 @@
 include "Viaje.php";
 include "Pasajero.php";
 include "ResponsableV.php";
-include "Terrestre.php";
-include "Aereo.php";
+include "Empresa.php";
+include "BaseDatos.php";
+
 
 /**************************************/
 /************** MODULOS ***************/
@@ -65,8 +66,6 @@ function creaViajes($cant, $tipoViaje)
         separador();
         $responsable = responsableViaje();
         echo "Ingrese el codigo del viaje ".($i+1)." : ";
-        $codigoViaje = trim(fgets(STDIN));
-        echo "Ingrese el destino del viaje ".($i+1)." : ";
         $destViaje = trim(fgets(STDIN));
         echo "Ingrese la cantidad de personas maximas que pueden realizar el viaje ".($i+1)." : ";
         $cantMax = trim(fgets(STDIN));
@@ -80,6 +79,8 @@ function creaViajes($cant, $tipoViaje)
         echo "Ingrese el importe del viaje ".($i+1)." : ";
         $importe = trim(fgets(STDIN));
         $importe = verificadorInt($importe);
+        echo "Ingrese el tipo de asiento del viaje ".($i)." ('1' para asiento de primera clase / '0' para asiento estandar) : ";
+        $tipoAsiento = trim(fgets(STDIN));
         if($cantPersonas <= $cantMax){
             for($i = 0;$i < $cantPersonas;$i++){
                 $objPasajero = personasViaje();
@@ -88,27 +89,11 @@ function creaViajes($cant, $tipoViaje)
         }else{
             echo "La cantidad de personas supera a la cantidad maxima del viaje!"."\n";
         }
-        if($tipoViaje == 1){
-            echo "Ingrese el tipo de asiento del viaje ".($i)." ('1' para asiento de primera clase / '0' para asiento estandar) : ";
-            $tipoAsiento = trim(fgets(STDIN));
-            $tipoAsiento = verificadorInt($tipoAsiento);
-            echo "Ingrese el numero del vuelo ".($i)."\n";
-            $nroVuelo = trim(fgets(STDIN));
-            $nroVuelo = verificadorInt($nroVuelo);
-            echo "Ingrese el nombre de la aerolinea del vuelo ".($i)."\n";
-            $nombreAero = trim(fgets(STDIN));
-            echo "Ingrese las escalas del vuelo ".($i)."\n";
-            $escalas = trim(fgets(STDIN));
-            $escalas = verificadorInt($escalas);
-            $arrayViajes[$i] = new Aereo($responsable,$arrayPasajeros,$cantMax,$destViaje,$codigoViaje,$importe,$tipoAsiento,$nroVuelo,$nombreAero,$escalas,$idaVuelta);
-            echo "El viaje se ha creado correctamente!"."\n";
-        }else{
-            echo "Ingrese el tipo de asiento del viaje ".($i)." ('1' para asiento cama o semicama/ '0' para asiento ) : ";
-            $tipoAsiento = trim(fgets(STDIN));
-            $tipoAsiento = verificadorInt($tipoAsiento);
-            $arrayViajes[$i] = new Terrestre($responsable,$arrayPasajeros,$cantMax,$destViaje,$codigoViaje,$importe,$tipoAsiento,$idaVuelta);
-            echo "El viaje se ha creado correctamente!"."\n";
-        }
+        $tipoAsiento = verificadorInt($tipoAsiento);
+        $arrayViajes[$i] = new Viaje($responsable,$arrayPasajeros,$cantMax,$destViaje,$importe,$tipoAsiento,$idaVuelta);
+        echo "El viaje se ha creado correctamente!"."\n";
+    }
+    foreach($arrayViajes as $viaje){
     }
     return $arrayViajes;  
 }
@@ -574,6 +559,7 @@ function opcionesViaje($arrayViajes){
     } while ($opcion != 0);
 }
 
+
 /**************************************/
 /******** VIAJES PRECARGADOS **********/
 /**************************************/
@@ -582,22 +568,24 @@ function opcionesViaje($arrayViajes){
 $arrayPersonas = [new Pasajero("Paula","Lopez",4020310,29946879),
                 new Pasajero("Mariano","Martinez",4687955,29946879),
                 new Pasajero("Juan","Legnazzi",3801546,29945879)];
-$arrayViajes[0] = new Aereo(new ResponsableV("Pablo","Orejas",516464,787554),$arrayPersonas,20,"Neuquen",1,30000,1,101,"FlyBondi",3,false);
+$arrayViajes[0] = new Viaje(new ResponsableV("Pablo","Orejas",516464,787554),$arrayPersonas,20,"Neuquen",30000,1,true);
 //Viaje 2
 $arrayPersonas = [new Pasajero("Sebastian","Legnazzi",4397918,299646879),
                 new Pasajero("Alejandra","Alegre",2546548,299564787)];
-$arrayViajes[1] = new Aereo(new ResponsableV("Felipe","Ortega",516778,55554),$arrayPersonas,30,"Buenos Aires",2,20000,0,202,"AeroArg",0,true);
+$arrayViajes[1] = new Viaje(new ResponsableV("Felipe","Ortega",516778,55554),$arrayPersonas,30,"Buenos Aires",20000,0,false);
 //Viaje 3
 $arrayPersonas = [new Pasajero("Martina","Laurel",3533646,299566477),
                 new Pasajero("Mauricio","Lamelin",4343458,29948997)];
-$arrayViajes[2] = new Terrestre(new ResponsableV("Chano","Tanbionica",121254,64684),$arrayPersonas,50,"Buenos Aires",3,20000,1,false);
+$arrayViajes[2] = new Viaje(new ResponsableV("Chano","Tanbionica",121254,64684),$arrayPersonas,50,"Buenos Aires",20000,1,true);
 
 /**************************************/
 /********* PROGRAMA PRINCIPAL *********/
 /**************************************/
 
 //Este programa ejecuta segun la opcion elegida del usuario la secuencia de pasos a seguir
-do{   
+do{
+
+    die();
     $seleccion = menuInicio();
     switch($seleccion){
         case 0:

@@ -8,8 +8,6 @@ class BaseDatos {
     private $QUERY;
     private $RESULT;
     private $ERROR;
-
-
     
     /**************************************/
     /**************** SET *****************/
