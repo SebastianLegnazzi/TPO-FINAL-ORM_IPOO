@@ -61,21 +61,26 @@ class Empresa {
     /************** FUNCIONES *************/
     /**************************************/
     
-    public function __construct($identificacion, $nombre, $direccion){
-        $this->identificacion = $identificacion;
-        $this->nombre = $nombre;
-        $this->direccion = $direccion;
+    public function __construct(){
+        $this->identificacion = "";
+        $this->nombre = "";
+        $this->direccion = "";
     }
 
+    public function cargar($identificacion, $nombre, $direccion){		
+        $this->setIdentificacion($identificacion);
+        $this->setNombre($nombre);
+        $this->setDireccion($direccion);
+    }
 
     /**
      * Este modulo agrega un pasajero de la BD.
     */
-    public function insertarEmpresa(){
+    public function insertar(){
         $baseDatos = new BaseDatos();
         $resp = null;
         $consulta = "INSERT INTO empresa (enombre, edireccion) 
-                    VALUES (".$this->getNombre().",'".$this->getDireccion()."')";
+                    VALUES ('".$this->getNombre()."','".$this->getDireccion()."')";
         if($baseDatos->iniciar()){
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
@@ -91,10 +96,10 @@ class Empresa {
     /**
      * Este modulo modifica un pasajero de la BD.
     */
-    public function modificarEmpresa(){
+    public function modificar(){
         $baseDatos = new BaseDatos();
         $resp = null;
-        $consulta = "UPDATE FROM empresa 
+        $consulta = "UPDATE empresa 
                     SET idempresa = ".$this->getIdentificacion().", 
                     enombre = '".$this->getNombre()."', 
                     edireccion ='".$this->getDireccion()."' WHERE idempresa = ".$this->getIdentificacion();
@@ -113,7 +118,7 @@ class Empresa {
     /**
      * Este elimina un pasajero de la BD.
     */
-    public function eliminarEmpresa(){
+    public function eliminar(){
         $baseDatos = new BaseDatos();
         $resp = null;
         $consulta = "DELETE FROM empresa WHERE idempresa = ".$this->getIdentificacion();
@@ -129,16 +134,16 @@ class Empresa {
         return $resp;
     }
 
-    public function buscarEmpresa($idEmpresa){
+    public function buscar($idEmpresa){
         $baseDatos = new BaseDatos();
 		$consulta="SELECT * FROM empresa WHERE idempresa = ".$idEmpresa;
 		$resp = null;
 		if($baseDatos->iniciar()){
 			if($baseDatos->ejecutar($consulta)){
-				if($empresa=$baseDatos->registro()){					
+				while($empresa=$baseDatos->registro()){					
 				    $this->setIdentificacion($idEmpresa);
-					$this->getNombre($empresa['pnombre']);
-					$this->getDireccion($empresa['edireccion']);
+					$this->setNombre($empresa['enombre']);
+					$this->setDireccion($empresa['edireccion']);
 					$resp= true;
 				}
 		 	}else{
@@ -150,21 +155,22 @@ class Empresa {
 		 return $resp;
 	}
 
-    public function listarEmpresa($condicion){
+    public function listar($condicion){
 	    $resp = null;
         $baseDatos = new BaseDatos();
 		$consultaEmpresa="SELECT * FROM empresa ";
 		if($condicion != ""){
-		    $consultaEmpresa +=' where '.$condicion;
+		    $consultaEmpresa .=' where '.$condicion;
 		}
 		if($baseDatos->iniciar()){
 			if($baseDatos->ejecutar($consultaEmpresa)){
-				if($empresa=$baseDatos->registro()){	
-                    $resp = [];				
+                $resp = [];	
+				while($empresa=$baseDatos->registro()){	
 				    $idEmpresa = $empresa['idempresa'];
-					$nombre = $empresa['pnombre'];
+					$nombre = $empresa['enombre'];
 					$direccion = $empresa['edireccion'];
-                    $objEmpresa = new Empresa($idEmpresa, $nombre, $direccion);
+                    $objEmpresa = new Empresa();
+                    $objEmpresa->cargar($idEmpresa, $nombre, $direccion);
 					array_push($resp, $objEmpresa);
 				}
 		 	}else{
@@ -178,7 +184,7 @@ class Empresa {
 
     public function __toString(){
         return "Identificacion de la empresa: ".$this->getIdentificacion()."\n".
-                "Nombre de la empresa".$this->getNombre()."\n".
+                "Nombre de la empresa: ".$this->getNombre()."\n".
                 "La direccion de la empresa es: ".$this->getDireccion()."\n";
     }
 

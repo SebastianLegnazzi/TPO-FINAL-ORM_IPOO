@@ -90,22 +90,31 @@ class Pasajero{
 	/************** FUNCIONES *************/
 	/**************************************/
 
-    public function __construct($nombre,$apellido,$documento,$telefono)
+    public function __construct()
     {
-        $this->nombre = $nombre;
-        $this->apellido = $apellido;
-        $this->documento = $documento;
-        $this->telefono = $telefono;
+        $this->nombre = "";
+        $this->apellido = "";
+        $this->documento = "";
+        $this->telefono = "";
+        $this->objViaje = "";
+    }
+
+    public function cargar($nombre, $apellido, $documento, $telefono, $objViaje){		
+        $this->setNombre($nombre);
+        $this->setApellido($apellido);
+        $this->setDocumento($documento);
+        $this->setTelefono($telefono);
+        $this->setObjViaje($objViaje);
     }
 
     /**
      * Este modulo agrega un pasajero de la BD.
     */
-    public function insertarPasajero(){
+    public function insertar(){
         $baseDatos = new BaseDatos();
         $resp = null;
         $consulta = "INSERT INTO pasajero (pdocumento, pnombre, papellido, ptelefono, idviaje) 
-                    VALUES (".$this->getDocumento().",'".$this->getNombre()."','".$this->getApellido()."','".$this->getTelefono()."','".$this->getObjViaje()->getIdaVuelta()."')";
+                    VALUES (".$this->getDocumento().",'".$this->getNombre()."','".$this->getApellido()."',".$this->getTelefono().",".$this->getObjViaje()->getIdViaje().")";
         if($baseDatos->iniciar()){
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
@@ -121,15 +130,15 @@ class Pasajero{
     /**
      * Este modulo modifica un pasajero de la BD.
     */
-    public function modificarPasajero(){
+    public function modificar(){
         $baseDatos = new BaseDatos();
         $resp = null;
-        $consulta = "UPDATE FROM pasajero 
+        $consulta = "UPDATE pasajero 
                     SET pdocumento = ".$this->getDocumento().", 
                     pnombre = '".$this->getNombre()."', 
                     papellido ='".$this->getApellido()."', 
                     ptelefono = ".$this->getTelefono().", 
-                    idviaje = '".$this->getObjViaje()->getIdaVuelta()."' WHERE pdocumento = ".$this->getDocumento();
+                    idviaje = ".$this->getObjViaje()->getIdViaje()." WHERE pdocumento = ".$this->getDocumento();
         if($baseDatos->iniciar()){
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
@@ -145,7 +154,7 @@ class Pasajero{
     /**
      * Este elimina un pasajero de la BD.
     */
-    public function eliminarPasajero(){
+    public function eliminar(){
         $baseDatos = new BaseDatos();
         $resp = null;
         $consulta = "DELETE FROM pasajero WHERE pdocumento = ".$this->getDocumento();
@@ -161,7 +170,7 @@ class Pasajero{
         return $resp;
     }
 
-    public function buscarPasajero($documento){
+    public function buscar($documento){
         $baseDatos = new BaseDatos();
 		$consulta="SELECT * FROM pasajero WHERE pdocumento = ".$documento;
 		$resp = null;
@@ -172,7 +181,9 @@ class Pasajero{
 					$this->setNombre($pasajero['pnombre']);
 					$this->setApellido($pasajero['papellido']);
 					$this->setTelefono($pasajero['ptelefono']);
-					$this->setObjViaje($pasajero['idviaje']);
+                    $objViaje = new Viaje();
+                    $objViaje->buscar($pasajero['idviaje']);
+                    $this->setObjViaje($objViaje);
 					$resp= true;
 				}
 		 	}else{
@@ -184,23 +195,25 @@ class Pasajero{
 		 return $resp;
 	}
 
-    public function listarPasajeros($condicion){
+    public function listar($condicion){
 	    $resp = null;
         $baseDatos = new BaseDatos();
 		$consultaPasajero="SELECT * FROM pasajero ";
 		if($condicion != ""){
-		    $consultaPasajero +=' where '.$condicion;
+		    $consultaPasajero .= " where ".$condicion;
 		}
 		if($baseDatos->iniciar()){
 			if($baseDatos->ejecutar($consultaPasajero)){
-				if($pasajero=$baseDatos->registro()){	
-                    $resp = [];				
+                $resp = [];				
+				while($pasajero=$baseDatos->registro()){	
 				    $documento = $pasajero['pdocumento'];
 					$nombre = $pasajero['pnombre'];
 					$apellido = $pasajero['papellido'];
-					$telofono = $pasajero['ptelefono'];
-					$idViaje = $pasajero['idviaje'];
-					$objPasajero = new Pasajero($nombre, $apellido, $documento, $idViaje);
+					$telefono = $pasajero['ptelefono'];
+					$objPasajero = new Pasajero();
+                    $objViaje = new Viaje();
+                    $objViaje->buscar($pasajero['idviaje']);
+					$objPasajero->cargar($nombre, $apellido, $documento, $telefono, $objViaje);
                     array_push($resp, $objPasajero);
 				}
 		 	}else{
@@ -217,7 +230,7 @@ class Pasajero{
         return ("El nombre del pasajero es: ".$this->getNombre()."\n".
                 "El apellido del pasajero es: ".$this->getApellido()."\n".
                 "El documento del pasajero es: ".$this->getDocumento()."\n".
-                "El codigo del viaje es: ".$this->getObjViaje()->getIdaVuelta()."\n".
+                "El codigo del viaje es: ".$this->getObjViaje()->getIdViaje()."\n".
                 "El telefono del pasajero es: ".$this->getTelefono()."\n");
     }
     

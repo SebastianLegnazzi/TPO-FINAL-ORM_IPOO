@@ -153,29 +153,40 @@ class Viaje{
     /**
      * Este modulo asigna los valores a los atributos cuando se crea una instancia de la clase
     */
-    public function __construct($idViaje, $vDestino, $vCantidadMax, $objEmpresa, $objResponsable, $vImporte, $tipoAsiento, $idaVuelta){
-        $this->idViaje = $idViaje;
-        $this->vDestino = $vDestino;
-        $this->vCantidadMax = $vCantidadMax;
+    public function __construct(){
+        $this->idViaje = "";
+        $this->vDestino = "";
+        $this->vCantidadMax = "";
         $this->arrayObjPasajero = [];
-        $this->objEmpresa = $objEmpresa;
-        $this->objResponsable = $objResponsable;
-        $this->vImporte = $vImporte;
-        $this->tipoAsiento = $tipoAsiento;
-        $this->idaVuelta = $idaVuelta;
+        $this->objEmpresa = "";
+        $this->objResponsable = "";
+        $this->vImporte = "";
+        $this->tipoAsiento = "";
+        $this->idaVuelta = "";
+    }
+
+    public function cargar($idViaje, $vDestino, $vCantidadMax, $objEmpresa, $objResponsable, $vImporte, $tipoAsiento, $idaVuelta){		
+        $this->setIdViaje($idViaje);
+        $this->setVDestino($vDestino);
+        $this->setVCantidadMax($vCantidadMax);
+        $this->setObjEmpresa($objEmpresa);
+        $this->setObjResponsable($objResponsable);
+        $this->setVImporte($vImporte);
+        $this->setTipoAsiento($tipoAsiento);
+        $this->setIdaVuelta($idaVuelta);
     }
     
     /**
      * Este modulo inserta en la BD el viaje
     */
-    public function insertarViaje(){
+    public function insertar(){
         $baseDatos = new BaseDatos();
         $resp = null;
         $consulta = "INSERT INTO viaje (vdestino, vcantmaxpasajeros, idempresa, rnumeroempleado, vimporte, tipoAsiento, idayvuelta) 
-                    VALUES (".$this->getVDestino().",'".$this->getVCantidadMax().",'".$this->getObjEmpresa()->getIdentificacion().",'".$this->getObjResponsable()->getNumEmpleado().",'".$this->getVImporte().",'".$this->getTipoAsiento().",'".$this->getIdaVuelta()."')";
+                    VALUES ('".$this->getVDestino()."',".$this->getVCantidadMax().",".$this->getObjEmpresa()->getIdentificacion().",".$this->getObjResponsable()->getNumEmpleado().",".$this->getVImporte().",".$this->getTipoAsiento().",'".$this->getIdaVuelta()."')";
         if($baseDatos->iniciar()){
             if($baseDatos->ejecutar($consulta)){
-                $resp = $baseDatos->registro();
+                $resp = true;
             }else{
                 $resp = $baseDatos->getError();
             }
@@ -188,16 +199,17 @@ class Viaje{
     /**
      * Este modulo modifica un viaje de la BD.
     */
-    public function modificarViaje(){
+    public function modificar(){
         $baseDatos = new BaseDatos();
         $resp = null;
-        $consulta = "UPDATE FROM viaje 
-                    SET vdestino = ".$this->getVDestino().", 
-                    vcantmaxpasajeros = '".$this->getVCantidadMax()."', 
-                    idempresa ='".$this->getObjEmpresa()->getIdentificacion()."', 
-                    rnumeroempleado = ".$this->getObjResponsable()->getNumEmpleado()."', 
-                    vimporte = '".$this->getVImporte()."',
-                    tipoAsiento = '".$this->getTipoAsiento()."',
+        $consulta = "UPDATE viaje 
+                    SET idViaje = ".$this->getIdViaje().",
+                    vdestino = '".$this->getVDestino()."', 
+                    vcantmaxpasajeros = ".$this->getVCantidadMax().", 
+                    idempresa = ".$this->getObjEmpresa()->getIdentificacion().", 
+                    rnumeroempleado = ".$this->getObjResponsable()->getNumEmpleado().", 
+                    vimporte = ".$this->getVImporte().",
+                    tipoAsiento = ".$this->getTipoAsiento().",
                     idayvuelta = '".$this->getIdaVuelta()."' WHERE idviaje = ".$this->getIdViaje();
         if($baseDatos->iniciar()){
             if($baseDatos->ejecutar($consulta)){
@@ -214,7 +226,7 @@ class Viaje{
     /**
      * Este elimina un viaje de la BD.
     */
-    public function eliminarViaje(){
+    public function eliminar(){
         $baseDatos = new BaseDatos();
         $resp = null;
         $consulta = "DELETE FROM viaje WHERE idviaje = ".$this->getIdViaje();
@@ -230,18 +242,22 @@ class Viaje{
         return $resp;
     }
 
-    public function buscarViaje($idViaje){
+    public function buscar($idViaje){
         $baseDatos = new BaseDatos();
 		$consulta="SELECT * FROM viaje WHERE idviaje = ".$idViaje;
 		$resp = null;
 		if($baseDatos->iniciar()){
 			if($baseDatos->ejecutar($consulta)){
-				if($viaje=$baseDatos->registro()){					
+				if($viaje=$baseDatos->registro()){
+                    $objReponsable = new ResponsableV();
+                    $objEmpresa = new Empresa();
+                    $objReponsable->buscar($viaje['rnumeroempleado']);					
+                    $objEmpresa->buscar($viaje['idempresa']);	
 				    $this->setIdViaje($idViaje);
-					$this->setIdaVuelta($viaje['vdestino']);
+					$this->setVDestino($viaje['vdestino']);
 					$this->setVCantidadMax($viaje['vcantmaxpasajeros']);
-					$this->setObjEmpresa($viaje['idempresa']);
-					$this->setObjResponsable($viaje['rnumeroempleado']);
+					$this->setObjEmpresa($objEmpresa);
+					$this->setObjResponsable($objReponsable);
 					$this->setVImporte($viaje['vimporte']);
 					$this->setTipoAsiento($viaje['tipoAsiento']);
 					$this->setIdaVuelta($viaje['idayvuelta']);
@@ -256,12 +272,12 @@ class Viaje{
 		 return $resp;
 	}	
 
-    public static function listarViajes($condicion){
+    public static function listar($condicion){
 	    $resp = null;
         $baseDatos = new BaseDatos();
 		$consultaViaje="SELECT * FROM viaje ";
 		if($condicion != ""){
-		    $consultaViaje +=' where '.$condicion;
+		    $consultaViaje .=' where '.$condicion;
 		}
 		if($baseDatos->iniciar()){
 			if($baseDatos->ejecutar($consultaViaje)){				
@@ -270,12 +286,15 @@ class Viaje{
 					$idViaje = $viaje['idviaje'];
 					$destino = $viaje['vdestino'];
 					$cantMaxPasajeros = $viaje['vcantmaxpasajeros'];
-					$idEmpresa = $viaje['idempresa'];
-					$numeroEmpleado = $viaje['rnumeroempleado'];
 					$importe = $viaje['vimporte'];
 					$tipoAsiento = $viaje['tipoAsiento'];
 					$idaYVuelta = $viaje['idayvuelta'];
-                    $objViaje = new Viaje($idViaje, $destino, $cantMaxPasajeros, $idEmpresa, $numeroEmpleado, $importe, $tipoAsiento, $idaYVuelta);
+                    $objViaje = new Viaje();
+                    $objReponsable = new ResponsableV();
+                    $objEmpresa = new Empresa();
+                    $objReponsable->buscar($viaje['rnumeroempleado']);
+                    $objEmpresa->buscar($viaje['idempresa']);
+                    $objViaje->cargar($idViaje, $destino, $cantMaxPasajeros, $objEmpresa, $objReponsable, $importe, $tipoAsiento, $idaYVuelta);
 					array_push($resp, $objViaje);
 				}
 		 	}else {
@@ -293,13 +312,13 @@ class Viaje{
     public function obtenerPasajeros(){
         $baseDatos = new BaseDatos();
         $resp = null;
-        $consulta = "SELECT * FROM pasajero WHERE idViaje = ".$this->getIdViaje();
+        $consulta = "idViaje = ".$this->getIdViaje();
         if($baseDatos->iniciar()){
-            if($baseDatos->ejecutar($consulta)){
-                while($row = $baseDatos->registro()){
-                    $resp = [];
-					array_push($resp,$row);
-                }
+            $objPasajero = new Pasajero();
+            $arrayObjPersona = $objPasajero->listar($consulta);
+            if(is_array($arrayObjPersona)){
+                $this->setArrayObjPasajero($arrayObjPersona);
+                $resp = true;
             }else{
                 $resp = $baseDatos->getError();
             }
@@ -308,6 +327,20 @@ class Viaje{
         }
         return $resp;
     }
+
+    /**
+     * Este modulo busca en la BD los pasajeros que coniciden con el viaje
+    */
+    public function hayPasajesDisponible(){
+        $this->obtenerPasajeros();
+        $arrayObjPasajero = $this->getArrayObjPasajero();
+        if(count($arrayObjPasajero) < $this->getVCantidadMax()){
+            $verificacion = true;
+        }else{
+            $verificacion = false;
+        }
+        return $verificacion;
+    }
     
     /**
      * Este modulo devuelve una cadena de caracteres mostrando el contenido de los atributos
@@ -315,12 +348,12 @@ class Viaje{
     */
     public function __toString(){
         return ("El codigo del viaje es: ".$this->getIdViaje()."\n".
-                "El destino del viaje es: ".$this->getVDestino()."\n".
-                "El id de la empresa es: ".$this->getObjEmpresa()->getIdentificacion()."\n"."\n".
-                "El numero del responsable del viaje es: ".$this->getObjResponsable()->getNumEmpleado()."\n"."\n".
-                "El importe del viaje es: "."\n".$this->getVImporte()."\n".
-                "El tipo de asiento del viaje es: "."\n".$this->getTipoAsiento()."\n".
-                "El viaje es de ida y vuelta: "."\n".$this->getIdaVuelta()."\n");
+                "El destino del viaje es: ".$this->getVDestino()."\n"."\n".
+                "Los datos de la empresa son: "."\n".$this->getObjEmpresa()."\n".
+                "Los datos del responsable del viaje son: "."\n".$this->getObjResponsable()."\n".
+                "El importe del viaje es: ".$this->getVImporte()."\n".
+                "El tipo de asiento del viaje es: ".$this->getTipoAsiento()."\n".
+                "El viaje es de ida y vuelta: ".$this->getIdaVuelta()."\n");
     }
 }
 

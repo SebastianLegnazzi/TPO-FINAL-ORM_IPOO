@@ -75,18 +75,25 @@ class ResponsableV{
 	/************** FUNCIONES *************/
 	/**************************************/
 
-	public function __construct($nombre, $apellido, $numLicencia, $numEmpleado)
+	public function __construct()
 	{
-        $this->nombre = $nombre;
-        $this->apellido = $apellido;
-		$this->numLicencia = $numLicencia;
-		$this->numEmpleado = $numEmpleado;
+        $this->nombre = "";
+        $this->apellido = "";
+		$this->numLicencia = "";
+		$this->numEmpleado = "";
 	}
+
+    public function cargar($nombre, $apellido, $numLicencia, $numEmpleado){		
+        $this->setNombre($nombre);
+        $this->setApellido($apellido);
+        $this->setNumLicencia($numLicencia);
+        $this->setNumEmpleado($numEmpleado);
+    }
 
     /**
      * Este modulo agrega un pasajero de la BD.
     */
-    public function insertarPasajero(){
+    public function insertar(){
         $baseDatos = new BaseDatos();
         $resp = null;
         $consulta = "INSERT INTO responsable (rnumerolicencia, rnombre, rapellido) 
@@ -106,10 +113,10 @@ class ResponsableV{
     /**
      * Este modulo modifica un pasajero de la BD.
     */
-    public function modificarPasajero(){
+    public function modificar(){
         $baseDatos = new BaseDatos();
         $resp = null;
-        $consulta = "UPDATE FROM responsable 
+        $consulta = "UPDATE responsable 
                     SET rnumerolicencia = ".$this->getNumLicencia().", 
                     rnombre = '".$this->getNombre()."', 
                     rapellido ='".$this->getApellido()."' WHERE rnumeroempleado = ".$this->getNumEmpleado();
@@ -128,7 +135,7 @@ class ResponsableV{
     /**
      * Este modulo modifica un pasajero de la BD.
     */
-    public function eliminarPasajero(){
+    public function eliminar(){
         $baseDatos = new BaseDatos();
         $resp = null;
         $consulta = "DELETE FROM responsable WHERE rnumeroempleado = ".$this->getNumEmpleado();
@@ -144,7 +151,7 @@ class ResponsableV{
         return $resp;
     }
 
-    public function buscarResponsable($nroEmpleado){
+    public function buscar($nroEmpleado){
         $baseDatos = new BaseDatos();
 		$consulta="SELECT * FROM responsable WHERE rnumeroempleado = ".$nroEmpleado;
 		$resp = null;
@@ -166,22 +173,23 @@ class ResponsableV{
 		 return $resp;
 	}
 
-    public function listarPasajeros($condicion){
+    public function listar($condicion){
 	    $resp = null;
         $baseDatos = new BaseDatos();
 		$consultaResponsable="SELECT * FROM responsable ";
 		if($condicion != ""){
-		    $consultaResponsable +=' where '.$condicion;
+		    $consultaResponsable .=' where '.$condicion;
 		}
 		if($baseDatos->iniciar()){
 			if($baseDatos->ejecutar($consultaResponsable)){
-				if($responsable=$baseDatos->registro()){		
-                    $resp = [];		
+                $resp = [];		
+				while($responsable=$baseDatos->registro()){		
 				    $nombre = $responsable['rnombre'];
 					$apellido = $responsable['rapellido'];
 					$nroLicencia = $responsable['rnumerolicencia'];
 					$nroEmpleado = $responsable['rnumeroempleado'];
-                    $objResponsable = new ResponsableV($nombre, $apellido, $nroLicencia, $nroEmpleado);
+                    $objResponsable = new ResponsableV();
+                    $objResponsable->cargar($nombre, $apellido, $nroLicencia, $nroEmpleado);
                     array_push($resp, $objResponsable);
 				}
 		 	}else{
