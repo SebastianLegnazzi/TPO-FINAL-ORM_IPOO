@@ -349,11 +349,12 @@ class Viaje{
     public function __toString(){
         return ("El codigo del viaje es: ".$this->getIdViaje()."\n".
                 "El destino del viaje es: ".$this->getVDestino()."\n"."\n".
-                "Los datos de la empresa son: "."\n".$this->getObjEmpresa()."\n".
-                "Los datos del responsable del viaje son: "."\n".$this->getObjResponsable()."\n".
+                "La cantidad maxima de pasajeros es: ".$this->getVCantidadMax()."\n"."\n".
                 "El importe del viaje es: ".$this->getVImporte()."\n".
                 "El tipo de asiento del viaje es: ".$this->getTipoAsiento()."\n".
-                "El viaje es de ida y vuelta: ".$this->getIdaVuelta()."\n");
+                "El viaje es de ida y vuelta: ".$this->getIdaVuelta()."\n").
+                "Los datos de la empresa son: "."\n".$this->getObjEmpresa()."\n".
+                "Los datos del responsable del viaje son: "."\n".$this->getObjResponsable()."\n";
     }
 }
 

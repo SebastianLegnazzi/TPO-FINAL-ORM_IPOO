@@ -46,9 +46,11 @@ function menuInicio(){
     "1. Cargar un nuevo Viaje"."\n".
     "2. Cargar una nueva Empresa"."\n".
     "3. Cargar un nuevo Responsable"."\n".
-    "4. Ver todos los viajes."."\n".
-    "5. Modificar un viaje"."\n".
-    "6. Elimina un viaje"."\n";
+    "4. Modificar datos de una empresa"."\n".
+    "5. Modificar datos de un responsable"."\n".
+    "6. Modificar un viaje"."\n".
+    "7. Ver todos los viajes."."\n".
+    "8. Elimina un viaje"."\n";
     echo "Opcion: ";
     $menu = trim(fgets(STDIN));
     echo "\n";
@@ -58,13 +60,11 @@ function menuInicio(){
 /**
  * Este modulo crea en la BD viajes
  * @param int $cant
- * @return array
  */
 function creaViajes($cant){
     for($i = 0; $i < $cant;$i++){
         $objEmpresa = pedirEmpresa();
         $objResponsable = pedirResponsable();
-        echo "Ingrese la empresa del viaje: "."\n";
         echo "Ingrese el destino del viaje ".($i+1)." : ";
         $destViaje = trim(fgets(STDIN));
         echo "Ingrese la cantidad de personas maximas que pueden realizar el viaje ".($i+1)." : ";
@@ -94,55 +94,68 @@ function creaViajes($cant){
     }
 }
 
+/**
+ * Este modulo pide que el usuario elija una empresa o la crea en la BD segun lo que decida y devuelve el objeto
+ * @return object
+ */
 function pedirEmpresa(){
     $objEmpresa = new Empresa();
-    $arrayObjEmpresa = $objEmpresa->listar("");
-    $stringEmpresa = "==============="."\n";
-    foreach($arrayObjEmpresa as $objEmpresa){
-        $stringEmpresa .= $objEmpresa."==============="."\n";
-    }
+    $stringEmpresa = stringObjEmpresa();
     echo "Ingrese el codigo de alguna de las siguientes empresas, en caso de no estar, ingrese 0 para cargar una: "."\n".$stringEmpresa;
     $empresaElegida = trim(fgets(STDIN));
+    $empresaElegida = verificadorInt($empresaElegida);
     if($empresaElegida == 0){
         crearEmpresa();
-        echo "Ingrese el codigo de alguna de las siguientes empresas"."\n".$stringEmpresa;
-        $empresaElegida = trim(fgets(STDIN));
-    }
-    $resp = $objEmpresa->buscar($empresaElegida);
-    while(!$resp){
-        echo "El codigo de la empresa no existe, porfavor ingrese alguna de las siguientes opciones: "."\n".$stringEmpresa;
-        $empresaElegida = trim(fgets(STDIN));
+        $resp = $objEmpresa->buscar(count($objEmpresa->listar("")));
+    }else{
         $resp = $objEmpresa->buscar($empresaElegida);
+    }
+    while(!$resp){
+        echo "El codigo de la empresa no existe, porfavor ingrese alguna de las siguientes opciones o ingrese 0 para cargar una: "."\n".$stringEmpresa;
+        $empresaElegida = trim(fgets(STDIN));
+        $empresaElegida = verificadorInt($empresaElegida);
+        if($empresaElegida == 0){
+            crearEmpresa();
+            $resp = $objEmpresa->buscar(count($objEmpresa->listar("")));
+        }else{
+            $resp = $objEmpresa->buscar($empresaElegida);
+        }
     }
     return $objEmpresa;
 }
 
+/**
+ * Este modulo pide que el usuario elija un responsable o la crea en la BD segun lo que decida y devuelve el objeto
+ * @return object
+ */
 function pedirResponsable(){
     $objResponsable = new ResponsableV();
-    $arrayObjResponsable = $objResponsable->listar("");
-    $stringResponsable = "==============="."\n";
-    foreach($arrayObjResponsable as $objResponsable){
-        $stringResponsable .= $objResponsable."==============="."\n";
-    }
+    $stringResponsable = stringObjResponsable();
     echo "Ingrese el numero de empleado de alguna de los siguientes resposnables, en caso de no estar, ingrese 0 para cargar uno: "."\n".$stringResponsable;
     $responsableElegido = trim(fgets(STDIN));
+    $responsableElegido = verificadorInt($responsableElegido);
     if($responsableElegido == 0){
         crearResponsable();
-        echo "Ingrese el numero de empleado de alguna de los siguientes resposnables"."\n".$stringResponsable;
-        $responsableElegido = trim(fgets(STDIN));
-    }
-    $resp = $objResponsable->buscar($responsableElegido);
-    while(!$resp){
-        echo "El numero de empleado no existe, porfavor ingrese uno de los siguientes responsables: "."\n".$stringResponsable;
-        $responsableElegido = trim(fgets(STDIN));
+        $resp = $objResponsable->buscar(count($objResponsable->listar("")));
+    }else{
         $resp = $objResponsable->buscar($responsableElegido);
+    }
+    while(!$resp){
+        echo "El numero de empleado no existe, porfavor ingrese uno de los siguientes responsables o ingrese 0 para cargar una: "."\n".$stringResponsable;
+        $responsableElegido = trim(fgets(STDIN));
+        $responsableElegido = verificadorInt($responsableElegido);
+        if($responsableElegido == 0){
+            crearResponsable();
+            $resp = $objResponsable->buscar(count($objResponsable->listar("")));
+        }else{
+            $resp = $objResponsable->buscar($responsableElegido);
+        }
     }
     return $objResponsable;
 }
 
 /**
- * Busca el index del viaje con el que va a realizar las operaciones
- * @param array $viajes
+ * Busca en la BD el viaje y devuelve el objeto
  * @return object
  */
 function viajeModificar()
@@ -195,12 +208,11 @@ function tipoVuelo($objViaje){
 }
 
 /**
- * Devuelve una cadena de caracteres para ver los datos del viaje por pantalla
- * @param array $arrayViajes
+ * Devuelve una cadena de caracteres para ver los datos del viaje
  * @return string
  */
 function stringObjViajes(){
-    $stringViajes = null;
+    $stringViajes = "";
     $objViaje = new Viaje();
     $arrayObjViaje = $objViaje->listar("");
     if($arrayObjViaje > 0){
@@ -211,6 +223,40 @@ function stringObjViajes(){
         }
     }
     return $stringViajes;
+}
+
+/**
+ * Devuelve una cadena de caracteres para ver los datos de la empresa
+ * @return string
+ */
+function stringObjEmpresa(){
+    $separador = "================================";
+    $objEmpresa = new Empresa();
+    $stringEmpresa = $separador."\n";
+    $arrayObjEmpresa = $objEmpresa->listar("");
+    if($arrayObjEmpresa > 0){
+        foreach($arrayObjEmpresa as $empresa){
+            $stringEmpresa.= $empresa."\n".$separador."\n";
+        }
+    }
+    return $stringEmpresa;
+}
+
+/**
+ * Devuelve una cadena de caracteres para ver los datos del responsable
+ * @return string
+ */
+function stringObjResponsable(){
+    $separador = "================================";
+    $objResponsable = new ResponsableV();
+    $stringResponsable = $separador."\n";
+    $arrayObjResponsable = $objResponsable->listar("");
+    if($arrayObjResponsable > 0){
+        foreach($arrayObjResponsable as $responsable){
+            $stringResponsable.= $responsable."\n".$separador."\n";
+        }
+    }
+    return $stringResponsable;
 }
 
 /**
@@ -239,8 +285,7 @@ function crearEmpresa(){
 }
 
 /**
- * Crea el responsable y devuelve el objeto
- * @return object
+ * Crea el responsable en la BD
  */
 function crearResponsable(){
     separador();
@@ -330,7 +375,7 @@ function verificadorInt($dato){
     return $dato;
 }
 /**
- * Verifica que el valor ingreasado sea un entero, en caso contario lo vuelve a pedir hasta que sea un entero
+ * Verifica que el valor ingreasado sea un 0 o 1, en caso contario lo vuelve a pedir hasta que sea el deseado
  * @param int $dato
  * @return int
  */
@@ -344,7 +389,7 @@ function verificarTipoAsiento($dato){
 }
 
 /**
- * Verifica que el valor ingreasado sea un entero, en caso contario lo vuelve a pedir hasta que sea un entero
+ * Verifica que el valor ingreasado sea 1 o 2, en caso contario lo vuelve a pedir hasta que sea el deseado
  * @param int $dato
  * @return string
  */
@@ -359,8 +404,8 @@ function verificarIdaVuelta($dato){
 }
 
 /**
- * Este modulo cambia datos del array Pasajeros
- * @param object $viaje
+ * Este modulo cambia datos del Pasajero
+ * @param object $objPasajero
  */
 function cambiarDatoPasajero($objPasajero){
     do{
@@ -433,8 +478,8 @@ function cambiarDatoPasajero($objPasajero){
 }
 
 /**
- * Este modulo cambia los datos del responsable del vuelo
- * @param object $viaje
+ * Este modulo cambia los datos del responsable
+ * @param object $objResponsable
  */
 function cambiarDatoResponsable($objResponsable){
     do{
@@ -453,9 +498,9 @@ function cambiarDatoResponsable($objResponsable){
                 $objResponsable->setNombre($nuevoNombre);
                 $resp = $objResponsable->modificar();
                 if($resp == true){
-                    echo "El telefono se ha cambiado correctamente!"."\n";
+                    echo "El nombre se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "El telefono no se pudo modificar por el siguiente error: ".$resp;
+                    echo "El nombre no se pudo modificar por el siguiente error: ".$resp;
                 }
                 separador();
                 break;
@@ -467,9 +512,9 @@ function cambiarDatoResponsable($objResponsable){
                 $objResponsable->setApellido($nuevoApellido);
                 $resp = $objResponsable->modificar();
                 if($resp == true){
-                    echo "El telefono se ha cambiado correctamente!"."\n";
+                    echo "El apellido se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "El telefono no se pudo modificar por el siguiente error: ".$resp;
+                    echo "El apellido no se pudo modificar por el siguiente error: ".$resp;
                 }
                 separador();
                 break;
@@ -481,9 +526,9 @@ function cambiarDatoResponsable($objResponsable){
                 $objResponsable->setNumLicencia($nuevoNumLicencia);
                 $resp = $objResponsable->modificar();
                 if($resp == true){
-                    echo "El telefono se ha cambiado correctamente!"."\n";
+                    echo "El numero de licencia se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "El telefono no se pudo modificar por el siguiente error: ".$resp;
+                    echo "El numero de licencia no se pudo modificar por el siguiente error: ".$resp;
                 }
                 separador();
                 break;
@@ -507,8 +552,67 @@ function cambiarDatoResponsable($objResponsable){
 }
 
 /**
+ * Este modulo cambia los datos de la empresa
+ * @param object $objEmpresa
+ */
+function cambiarDatoEmpresa($objEmpresa){
+    do{
+        echo "Ingrese que dato desea cambiar: "."\n".
+             "1. Modificar Nombre "."\n".
+             "2. Modificar Direccion "."\n".
+             "3. Ver datos "."\n".
+             "4. Salir "."\n";
+        $seleccion = trim(fgets(STDIN));
+        switch ($seleccion){
+            case 1: 
+                separador();
+                echo "Ingrese el nuevo nombre para la empresa: "; 
+                $nuevoNombre = trim(fgets(STDIN));
+                $objEmpresa->setNombre($nuevoNombre);
+                $resp = $objEmpresa->modificar();
+                if($resp == true){
+                    echo "El nombre de la empresa se ha cambiado correctamente!"."\n";
+                }else{
+                    echo "El nombre de la empresa no se pudo modificar por el siguiente error: ".$resp;
+                }
+                separador();
+                break;
+
+            case 2: 
+                separador();
+                echo "Ingrese la nueva direccion: "; 
+                $nuevaDireccion = trim(fgets(STDIN));
+                $objEmpresa->setDireccion($nuevaDireccion);
+                $resp = $objEmpresa->modificar();
+                if($resp == true){
+                    echo "La direccion se ha cambiado correctamente!"."\n";
+                }else{
+                    echo "La direccion no se pudo modificar por el siguiente error: ".$resp;
+                }
+                separador();
+                break;
+
+            case 3: 
+                separador();
+                echo $objEmpresa;
+                separador();
+                break;
+
+            case 4: 
+                break;
+            break;
+
+            default:
+            echo "El número que ingresó no es válido, por favor ingrese un número del 1 al 4"."\n"."\n";
+            break;
+                
+        }
+        }while($seleccion != 4);
+}
+
+/**
  * Este modulo cambia los datos del viaje
- * @param object $viaje
+ * @param object $objViaje
  */
 function cambiarDatosViaje($objViaje){
     do{
@@ -559,9 +663,9 @@ function cambiarDatosViaje($objViaje){
                 $objViaje->setVImporte($nuevoImporte);
                 $resp = $objViaje->modificar();
                 if($resp){
-                    echo "La capacidad se ha cambiado correctamente!"."\n";
+                    echo "El importe se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "La capacidad maxima no se ha podido cambiar por el siguiente error: ".$resp."\n";
+                    echo "El importe no se ha podido cambiar por el siguiente error: ".$resp."\n";
                 }
                 separador();
                 break;
@@ -574,9 +678,9 @@ function cambiarDatosViaje($objViaje){
                 $objViaje->setTipoAsiento($nuevoTipAsiento);
                 $resp = $objViaje->modificar();
                 if($resp){
-                    echo "La capacidad se ha cambiado correctamente!"."\n";
+                    echo "El tipo de asiento se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "La capacidad maxima no se ha podido cambiar por el siguiente error: ".$resp."\n";
+                    echo "El tipo de asiento no se ha podido cambiar por el siguiente error: ".$resp."\n";
                 }
                 separador();
             break;
@@ -589,9 +693,9 @@ function cambiarDatosViaje($objViaje){
                 $objViaje->setIdaVuelta($nuevoTipViaje);
                 $resp = $objViaje->modificar();
                 if($resp){
-                    echo "La capacidad se ha cambiado correctamente!"."\n";
+                    echo "El tipo de viaje se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "La capacidad maxima no se ha podido cambiar por el siguiente error: ".$resp."\n";
+                    echo "El tipo de viaje no se ha podido cambiar por el siguiente error: ".$resp."\n";
                 }
                 separador();
             break;
@@ -607,13 +711,16 @@ function cambiarDatosViaje($objViaje){
             break;
 
             default:
-            echo "El número que ingresó no es válido, por favor ingrese un número del 1 al 5"."\n"."\n";
+            echo "El número que ingresó no es válido, por favor ingrese un número del 1 al 7"."\n"."\n";
             break;
                 
         }
         }while($seleccion != 7);
 }
 
+/**
+ * Este modulo modifica datos del viaje
+ */
 function opcionesViaje(){
     $objViaje = viajeModificar();
     $opcion = menu();
@@ -762,6 +869,7 @@ function opcionesViaje(){
 do{
     $objViaje = new Viaje();
     $dimensionViaje = count($objViaje->listar(""));
+    $seleccion = "";
     if($dimensionViaje > 0){
         $seleccion = menuInicio();
         switch($seleccion){
@@ -790,20 +898,52 @@ do{
                 crearResponsable();
             break;
 
-            // Mostrar todos los viajes
+            // Modificar datos de una empresa
             case 4:
+                $stringEmpresa = stringObjEmpresa();
+                $objEmpresa = new Empresa();
+                echo "Ingrese la identificacion de la empresa que desea modificar: "."\n".$stringEmpresa;
+                $empresaModificar = trim(fgets(STDIN));
+                $resp = $objEmpresa->buscar($empresaModificar);
+                if($resp){
+                    cambiarDatoEmpresa($objEmpresa);
+                }else{
+                    separador();
+                    echo "El numero de la empresa seleccionada no existe!"."\n";
+                    separador();
+                }
+            break;
+
+            // Modificar datos de un responsable
+            case 5:
+                $stringResponsable = stringObjResponsable();
+                $objResponsable = new ResponsableV();
+                echo "Ingrese el numero de empleado del responsable que desea modificar: "."\n".$stringResponsable;
+                $responsableModificar = trim(fgets(STDIN));
+                $resp = $objResponsable->buscar($responsableModificar);
+                if($resp){
+                    cambiarDatoResponsable($objResponsable);
+                }else{
+                    separador();
+                    echo "El numero del responsable seleccionado no existe!"."\n";
+                    separador();
+                }
+            break;
+
+            //Modificar un viaje
+            case 6:
+                opcionesViaje();
+            break;
+    
+            // Mostrar todos los viajes
+            case 7:
                 separador();
                 mostrarViajes();
                 separador();
             break;
-    
-            // Modificar un viaje
-            case 5:
-                opcionesViaje();
-            break;
             
             // Elimina un viaje
-            case 6:
+            case 8:
                 separador();
                 echo "Los viajes son: "."\n".stringObjViajes();
                 echo "Ingrese el codigo del viaje que desea eliminar: ";
@@ -831,7 +971,7 @@ do{
             break;
     
             default : 
-            echo "El número que ingresó no es válido, por favor ingrese un número del 0 al 6"."\n"."\n";
+            echo "El número que ingresó no es válido, por favor ingrese un número del 0 al 8"."\n"."\n";
             break;
         }
     }else{
