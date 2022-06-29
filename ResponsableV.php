@@ -4,6 +4,7 @@ class ResponsableV{
     private $apellido;
     private $numEmpleado;
     private $numLicencia;
+    private $mensajeError;
 
     /**************************************/
 	/**************** SET *****************/
@@ -35,6 +36,13 @@ class ResponsableV{
      */ 
     public function setNombre($nombre){
         $this->nombre = $nombre;
+    }
+
+    /**
+     * Establece el valor de mensajeError
+     */ 
+    public function setMensajeError($mensajeError){
+        $this->mensajeError = $mensajeError;
     }
 
 
@@ -70,6 +78,13 @@ class ResponsableV{
         return $this->numLicencia;
     }
 
+        /**
+     * Obtiene el valor de mensajeError
+     */ 
+    public function getMensajeError(){
+        return $this->mensajeError;
+    }
+
 
 	/**************************************/
 	/************** FUNCIONES *************/
@@ -102,10 +117,12 @@ class ResponsableV{
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
     }
@@ -124,10 +141,12 @@ class ResponsableV{
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
     }
@@ -143,10 +162,12 @@ class ResponsableV{
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
     }
@@ -165,10 +186,12 @@ class ResponsableV{
 					$resp= true;
 				}
 		 	}else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
 			}
 		 }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
 		 }		
 		 return $resp;
 	}
@@ -184,19 +207,17 @@ class ResponsableV{
 			if($baseDatos->ejecutar($consultaResponsable)){
                 $resp = [];		
 				while($responsable=$baseDatos->registro()){		
-				    $nombre = $responsable['rnombre'];
-					$apellido = $responsable['rapellido'];
-					$nroLicencia = $responsable['rnumerolicencia'];
-					$nroEmpleado = $responsable['rnumeroempleado'];
                     $objResponsable = new ResponsableV();
-                    $objResponsable->cargar($nombre, $apellido, $nroLicencia, $nroEmpleado);
+                    $objResponsable->buscar($responsable['rnumeroempleado']);
                     array_push($resp, $objResponsable);
 				}
 		 	}else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
 			}
 		 }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
 		 }		
 		 return $resp;
 	}
@@ -208,6 +229,8 @@ class ResponsableV{
 				"El numero de empleado es: ".$this->getNumEmpleado()."\n".
 				"El numero de licencia es: ".$this->getNumLicencia()."\n");
 	}
+
+
 
 }
 ?>

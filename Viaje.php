@@ -9,6 +9,7 @@ class Viaje{
     private $vImporte;    
     private $tipoAsiento;
     private $idaVuelta;    
+    private $mensajeError;
 
     /**************************************/
     /**************** SET *****************/
@@ -76,7 +77,13 @@ class Viaje{
     public function setIdaVuelta($idaVuelta){
         $this->idaVuelta = $idaVuelta;
     }
-
+    
+    /**
+     * Establece el valor de mensajeError
+     */ 
+    public function setMensajeError($mensajeError){
+        $this->mensajeError = $mensajeError;
+    }
 
     /**************************************/
     /**************** GET *****************/
@@ -145,6 +152,14 @@ class Viaje{
         return $this->idaVuelta;
     }
 
+    
+    /**
+     * Obtiene el valor de mensajeError
+     */ 
+    public function getMensajeError(){
+        return $this->mensajeError;
+    }
+
 
     /**************************************/
     /************** FUNCIONES *************/
@@ -188,10 +203,12 @@ class Viaje{
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
     }
@@ -215,10 +232,12 @@ class Viaje{
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
     }
@@ -234,10 +253,12 @@ class Viaje{
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
     }
@@ -264,16 +285,18 @@ class Viaje{
 					$resp= true;
 				}
 		 	}else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
 			}
 		 }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
 		 }		
 		 return $resp;
 	}	
 
-    public static function listar($condicion){
-	    $resp = null;
+    public function listar($condicion){
+	    $resp = [];
         $baseDatos = new BaseDatos();
 		$consultaViaje="SELECT * FROM viaje ";
 		if($condicion != ""){
@@ -281,27 +304,16 @@ class Viaje{
 		}
 		if($baseDatos->iniciar()){
 			if($baseDatos->ejecutar($consultaViaje)){				
-				$resp = [];
 				while($viaje=$baseDatos->registro()){
-					$idViaje = $viaje['idviaje'];
-					$destino = $viaje['vdestino'];
-					$cantMaxPasajeros = $viaje['vcantmaxpasajeros'];
-					$importe = $viaje['vimporte'];
-					$tipoAsiento = $viaje['tipoAsiento'];
-					$idaYVuelta = $viaje['idayvuelta'];
                     $objViaje = new Viaje();
-                    $objReponsable = new ResponsableV();
-                    $objEmpresa = new Empresa();
-                    $objReponsable->buscar($viaje['rnumeroempleado']);
-                    $objEmpresa->buscar($viaje['idempresa']);
-                    $objViaje->cargar($idViaje, $destino, $cantMaxPasajeros, $objEmpresa, $objReponsable, $importe, $tipoAsiento, $idaYVuelta);
+                    $objViaje->buscar($viaje['idviaje']);
 					array_push($resp, $objViaje);
 				}
 		 	}else {
-                $resp = $baseDatos->getError();
+                $this->setMensajeError($baseDatos->getERROR());
 			}
 		 }else{
-            $resp = $baseDatos->getError();
+            $this->setMensajeError($baseDatos->getERROR());
 		 }	
 		 return $resp;
 	}	
@@ -320,10 +332,12 @@ class Viaje{
                 $this->setArrayObjPasajero($arrayObjPersona);
                 $resp = true;
             }else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
     }
@@ -356,6 +370,7 @@ class Viaje{
                 "Los datos de la empresa son: "."\n".$this->getObjEmpresa()."\n".
                 "Los datos del responsable del viaje son: "."\n".$this->getObjResponsable()."\n";
     }
+
 }
 
 ?>

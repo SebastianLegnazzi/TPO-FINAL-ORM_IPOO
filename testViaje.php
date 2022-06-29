@@ -21,7 +21,7 @@ function menu(){
     echo "\n"."MENU DE OPCIONES"."\n";
     echo "1) Saber la cantidad de pasajeros."."\n";
     echo "2) Ver los datos del viaje."."\n";
-    echo "3) Ver los datos de los pasajeros."."\n";
+    echo "3) Ver los datos de todos los pasajeros."."\n";
     echo "4) Modificar los datos de un pasajero."."\n";
     echo "5) Agregar pasajeros al viaje."."\n";
     echo "6) Eliminar un pasajero del viaje."."\n";
@@ -81,17 +81,41 @@ function creaViajes($cant){
         $tipoAsiento = verificarTipoAsiento($tipoAsiento);
         $objViaje = new Viaje();
         $objViaje->cargar(null, $destViaje, $cantMax, $objEmpresa, $objResponsable, $importe, $tipoAsiento, $idaVuelta);
-        $resp = $objViaje->insertar();
-        if($resp){
+        if(viajeRepetido($objViaje)){
             separador();
-            echo "El viaje se ha creado correctamente!"."\n";
+            echo "Ya hay un viaje con el mismo destino!"."\n";
             separador();
         }else{
-            separador();
-            echo "No se pudo insertar el viaje a la Base de Datos por el siguiente error: "."\n".$resp;
-            separador();
+            $resp = $objViaje->insertar();
+            if($resp){
+                separador();
+                echo "El viaje se ha creado correctamente!"."\n";
+                separador();
+            }else{
+                separador();
+                echo "No se pudo insertar el viaje a la Base de Datos por el siguiente error: "."\n".$objViaje->getMensajeError();
+                separador();
+            }
         }
     }
+}
+
+/**
+ * Este modulo en caso de que exista el viaje no permite crear otro
+ */
+function viajeRepetido($objViajeIngresado){
+    $objViaje = new Viaje();
+    $arrayObjViaje = $objViaje->listar("");
+    $i = 0;
+    $mismoViaje = false;
+    while(!$mismoViaje && ($i < count($arrayObjViaje))){
+        if(strtolower($arrayObjViaje[$i]->getVDestino()) == strtolower($objViajeIngresado->getVDestino())){
+            $mismoViaje = true;
+        }else{
+            $i++;
+        }
+    }
+    return $mismoViaje;
 }
 
 /**
@@ -215,7 +239,7 @@ function stringObjViajes(){
     $stringViajes = "";
     $objViaje = new Viaje();
     $arrayObjViaje = $objViaje->listar("");
-    if($arrayObjViaje > 0){
+    if(count($arrayObjViaje) > 0){
         foreach($arrayObjViaje as $viaje){
             $stringTipoAsiento = tipoAsientoViaje($viaje);
             $tipoVuelo = tipoVuelo($viaje);
@@ -278,7 +302,7 @@ function crearEmpresa(){
         separador();
     }else{
         separador();
-        echo "No se pudo insertar la empresa a la Base de Datos por el siguiente error: "."\n".$resp;
+        echo "No se pudo insertar la empresa a la Base de Datos por el siguiente error: "."\n".$objEmpresa->getMensajeError()."\n";
         $objEmpresa = null;
         separador();
     }
@@ -307,7 +331,7 @@ function crearResponsable(){
         separador();
     }else{
         separador();
-        echo "No se pudo insertar el responsable a la Base de Datos por el siguiente error: "."\n".$resp."\n";
+        echo "No se pudo insertar el responsable a la Base de Datos por el siguiente error: "."\n".$objResponsable->getMensajeError()."\n";
         $objResponsable = null;
         separador();
     }
@@ -327,16 +351,41 @@ function crearPasajero($objViaje){
     $telefonoPasajero =  trim(fgets(STDIN));
     echo "\n";
     $objPasajero = new Pasajero();
-    $objPasajero->cargar($nombrePasajero,$apellidoPasajero,$dniPasajero,$telefonoPasajero,$objViaje);
-    $resp = $objPasajero->insertar();
+    $resp = $objPasajero->buscar($dniPasajero);
     if($resp){
+        pasajeroExistente($objPasajero, $objViaje);
+    }else{
+        $objPasajero->cargar($nombrePasajero,$apellidoPasajero,$dniPasajero,$telefonoPasajero,$objViaje);
+        $resp = $objPasajero->insertar();
+        if($resp){
+            separador();
+            echo "El pasajero se inserto a la Base de Datos correctamente!"."\n";
+        }else{
+            separador();
+            echo "No se pudo insertar el pasajero a la Base de Datos por el siguiente error: "."\n".$objPasajero->getMensajeError()."\n";
+        }
+    }
+
+}
+
+/**
+ * Este modulo en caso de que exista el pasajero pregunta si se desea cambiar de viaje
+ */
+function pasajeroExistente($objPasajeroIngresado, $objViaje){
+    echo "El pasajero ya existe! desea cambiarlo del viaje ".$objPasajeroIngresado->getObjViaje()->getIdViaje()." al ".$objViaje->getIdViaje()."?"."\n"."Si/No"."\n";
+    $decision = trim(fgets(STDIN));
+    while((strtolower($decision) <> "si") && (strtolower($decision) <> "no")){
+        echo "La decision ingresada no es una de las pedidas, porfavor ingrese"."\n"."Si/No"."\n";
+        $decision = trim(fgets(STDIN));
+    }
+    if(strtolower($decision) == "si"){
+        $objPasajeroIngresado->setObjViaje($objViaje);
+        $objPasajeroIngresado->modificar();
         separador();
-        echo "El pasajero se inserto a la Base de Datos correctamente!"."\n";
-        separador();
+        echo "El pasajero fue modificado correctamente! de viaje!"."\n";
     }else{
         separador();
-        echo "No se pudo insertar el pasajero a la Base de Datos por el siguiente error: "."\n".$resp;
-        separador();
+        echo "El pasajero sigue con su viaje y no se realizo ningun cambio!"."\n";
     }
 }
 
@@ -426,7 +475,7 @@ function cambiarDatoPasajero($objPasajero){
                 if($resp == true){
                     echo "El nombre se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "El nombre no se pudo modificar por el siguiente error: ".$resp;
+                    echo "El nombre no se pudo modificar por el siguiente error: ".$objPasajero->getMensajeError()."\n";
                 }
                 separador();
                 break;
@@ -440,7 +489,7 @@ function cambiarDatoPasajero($objPasajero){
                 if($resp == true){
                     echo "El apellido se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "El apellido no se pudo modificar por el siguiente error: ".$resp;
+                    echo "El apellido no se pudo modificar por el siguiente error: ".$objPasajero->getMensajeError()."\n";
                 }
                 separador();
                 break;
@@ -500,7 +549,7 @@ function cambiarDatoResponsable($objResponsable){
                 if($resp == true){
                     echo "El nombre se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "El nombre no se pudo modificar por el siguiente error: ".$resp;
+                    echo "El nombre no se pudo modificar por el siguiente error: ".$objResponsable->getMensajeError()."\n";
                 }
                 separador();
                 break;
@@ -514,7 +563,7 @@ function cambiarDatoResponsable($objResponsable){
                 if($resp == true){
                     echo "El apellido se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "El apellido no se pudo modificar por el siguiente error: ".$resp;
+                    echo "El apellido no se pudo modificar por el siguiente error: ".$objResponsable->getMensajeError()."\n";
                 }
                 separador();
                 break;
@@ -528,7 +577,7 @@ function cambiarDatoResponsable($objResponsable){
                 if($resp == true){
                     echo "El numero de licencia se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "El numero de licencia no se pudo modificar por el siguiente error: ".$resp;
+                    echo "El numero de licencia no se pudo modificar por el siguiente error: ".$objResponsable->getMensajeError()."\n";
                 }
                 separador();
                 break;
@@ -573,7 +622,7 @@ function cambiarDatoEmpresa($objEmpresa){
                 if($resp == true){
                     echo "El nombre de la empresa se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "El nombre de la empresa no se pudo modificar por el siguiente error: ".$resp;
+                    echo "El nombre de la empresa no se pudo modificar por el siguiente error: ".$objEmpresa->getMensajeError()."\n";
                 }
                 separador();
                 break;
@@ -587,7 +636,7 @@ function cambiarDatoEmpresa($objEmpresa){
                 if($resp == true){
                     echo "La direccion se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "La direccion no se pudo modificar por el siguiente error: ".$resp;
+                    echo "La direccion no se pudo modificar por el siguiente error: ".$objEmpresa->getMensajeError()."\n";
                 }
                 separador();
                 break;
@@ -635,7 +684,7 @@ function cambiarDatosViaje($objViaje){
                 if($resp){
                     echo "El destino se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "El destino no se ha podido cambiar por el siguiente error: ".$resp."\n";
+                    echo "El destino no se ha podido cambiar por el siguiente error: ".$objViaje->getMensajeError()."\n";
                 }
                 separador();
                 break;
@@ -650,7 +699,7 @@ function cambiarDatosViaje($objViaje){
                 if($resp){
                     echo "La capacidad se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "La capacidad maxima no se ha podido cambiar por el siguiente error: ".$resp."\n";
+                    echo "La capacidad maxima no se ha podido cambiar por el siguiente error: ".$objViaje->getMensajeError()."\n";
                 }
                 separador();
                 break;
@@ -665,7 +714,7 @@ function cambiarDatosViaje($objViaje){
                 if($resp){
                     echo "El importe se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "El importe no se ha podido cambiar por el siguiente error: ".$resp."\n";
+                    echo "El importe no se ha podido cambiar por el siguiente error: ".$objViaje->getMensajeError()."\n";
                 }
                 separador();
                 break;
@@ -680,7 +729,7 @@ function cambiarDatosViaje($objViaje){
                 if($resp){
                     echo "El tipo de asiento se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "El tipo de asiento no se ha podido cambiar por el siguiente error: ".$resp."\n";
+                    echo "El tipo de asiento no se ha podido cambiar por el siguiente error: ".$objViaje->getMensajeError()."\n";
                 }
                 separador();
             break;
@@ -695,7 +744,7 @@ function cambiarDatosViaje($objViaje){
                 if($resp){
                     echo "El tipo de viaje se ha cambiado correctamente!"."\n";
                 }else{
-                    echo "El tipo de viaje no se ha podido cambiar por el siguiente error: ".$resp."\n";
+                    echo "El tipo de viaje no se ha podido cambiar por el siguiente error: ".$objViaje->getMensajeError()."\n";
                 }
                 separador();
             break;
@@ -795,7 +844,6 @@ function opcionesViaje(){
                     for($i = 0;$i < $cantPasajerosNuevos;$i++){
                         crearPasajero($objViaje);
                     }                
-                    echo "Los pasajeros se agregaron correctamente al viaje!"."\n";
                 }else{
                     echo "La cantidad de pasajeros es superior a la capacidad maxima!"."\n";
                 }
@@ -817,7 +865,7 @@ function opcionesViaje(){
                 if($resp){
                     echo "El pasajero se elimino correctamente!"."\n";
                 }else{
-                    echo "No se pudo elimiar el pasajero por el siguiente error: ".$resp;
+                    echo "No se pudo elimiar el pasajero por el siguiente error: ".$objPasajero->getMensajeError()."\n";
                 }
             }else{
                 echo "El DNI del pasajero ingresado no existe!"."\n";
@@ -965,7 +1013,8 @@ do{
                         echo "el codigo ingresado no coicide con ningun viaje!"."\n";
                     }
                 }else{
-                    echo "No se puede eliminar el viaje, ya que contiene pasajeros!"."\n";
+                    separador();
+                    echo "El viaje no se puede eliminar porque tiene pasajeros!"."\n";
                 }
                 separador();
             break;

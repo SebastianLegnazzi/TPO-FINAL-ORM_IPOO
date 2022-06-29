@@ -5,6 +5,7 @@ class Pasajero{
     private $documento;
     private $telefono;
     private $objViaje;
+    private $mensajeError;
 
     /**************************************/
 	/**************** SET *****************/
@@ -43,6 +44,13 @@ class Pasajero{
      */ 
     public function setObjViaje($objViaje){
         $this->objViaje = $objViaje;
+    }
+
+    /**
+     * Establece el valor de mensajeError
+     */ 
+    public function setMensajeError($mensajeError){
+        $this->mensajeError = $mensajeError;
     }
 
 
@@ -85,6 +93,12 @@ class Pasajero{
         return $this->objViaje;
     }
 
+    /**
+     * Obtiene el valor de mensajeError
+     */ 
+    public function getMensajeError(){
+        return $this->mensajeError;
+    }
 
 	/**************************************/
 	/************** FUNCIONES *************/
@@ -119,10 +133,12 @@ class Pasajero{
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
     }
@@ -143,10 +159,12 @@ class Pasajero{
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
     }
@@ -162,10 +180,12 @@ class Pasajero{
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
     }
@@ -187,10 +207,12 @@ class Pasajero{
 					$resp= true;
 				}
 		 	}else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
 			}
 		 }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
 		 }		
 		 return $resp;
 	}
@@ -206,21 +228,17 @@ class Pasajero{
 			if($baseDatos->ejecutar($consultaPasajero)){
                 $resp = [];				
 				while($pasajero=$baseDatos->registro()){	
-				    $documento = $pasajero['pdocumento'];
-					$nombre = $pasajero['pnombre'];
-					$apellido = $pasajero['papellido'];
-					$telefono = $pasajero['ptelefono'];
 					$objPasajero = new Pasajero();
-                    $objViaje = new Viaje();
-                    $objViaje->buscar($pasajero['idviaje']);
-					$objPasajero->cargar($nombre, $apellido, $documento, $telefono, $objViaje);
+					$objPasajero->buscar($pasajero['pdocumento']);
                     array_push($resp, $objPasajero);
 				}
 		 	}else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
 			}
 		 }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
 		 }		
 		 return $resp;
 	}
@@ -234,5 +252,7 @@ class Pasajero{
                 "El telefono del pasajero es: ".$this->getTelefono()."\n");
     }
     
+
+
 }
 ?>

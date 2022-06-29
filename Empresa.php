@@ -3,7 +3,7 @@ class Empresa {
     private $identificacion;
     private $nombre;
     private $direccion;
-
+    private $mensajeError;
     
     /**************************************/
     /**************** SET *****************/
@@ -30,6 +30,12 @@ class Empresa {
         $this->direccion = $direccion;
     }
 
+    /**
+     * Establece el valor de mensajeError
+     */ 
+    public function setMensajeError($mensajeError){
+        $this->mensajeError = $mensajeError;
+    }
     
     /**************************************/
     /**************** GET *****************/
@@ -54,6 +60,13 @@ class Empresa {
      */ 
     public function getDireccion(){
         return $this->direccion;
+    }
+
+    /**
+     * Obtiene el valor de mensajeError
+     */ 
+    public function getMensajeError(){
+        return $this->mensajeError;
     }
     
     
@@ -85,10 +98,12 @@ class Empresa {
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
     }
@@ -107,10 +122,12 @@ class Empresa {
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
     }
@@ -126,10 +143,12 @@ class Empresa {
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
     }
@@ -147,10 +166,12 @@ class Empresa {
 					$resp= true;
 				}
 		 	}else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
 			}
 		 }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
 		 }		
 		 return $resp;
 	}
@@ -166,18 +187,17 @@ class Empresa {
 			if($baseDatos->ejecutar($consultaEmpresa)){
                 $resp = [];	
 				while($empresa=$baseDatos->registro()){	
-				    $idEmpresa = $empresa['idempresa'];
-					$nombre = $empresa['enombre'];
-					$direccion = $empresa['edireccion'];
                     $objEmpresa = new Empresa();
-                    $objEmpresa->cargar($idEmpresa, $nombre, $direccion);
+                    $objEmpresa->buscar($empresa['idempresa']);
 					array_push($resp, $objEmpresa);
 				}
 		 	}else{
-                $resp = $baseDatos->getError();
+                $resp = false;
+                $this->setMensajeError($baseDatos->getERROR());
 			}
 		 }else{
-            $resp = $baseDatos->getError();
+            $resp = false;
+            $this->setMensajeError($baseDatos->getERROR());
 		 }		
 		 return $resp;
 	}
@@ -187,7 +207,6 @@ class Empresa {
                 "Nombre de la empresa: ".$this->getNombre()."\n".
                 "La direccion de la empresa es: ".$this->getDireccion()."\n";
     }
-
 
 
 }
