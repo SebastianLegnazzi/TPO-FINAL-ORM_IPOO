@@ -126,18 +126,16 @@ class Pasajero{
     */
     public function insertar(){
         $baseDatos = new BaseDatos();
-        $resp = null;
+        $resp = false;
         $consulta = "INSERT INTO pasajero (pdocumento, pnombre, papellido, ptelefono, idviaje) 
                     VALUES (".$this->getDocumento().",'".$this->getNombre()."','".$this->getApellido()."',".$this->getTelefono().",".$this->getObjViaje()->getIdViaje().")";
         if($baseDatos->iniciar()){
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
@@ -148,7 +146,7 @@ class Pasajero{
     */
     public function modificar(){
         $baseDatos = new BaseDatos();
-        $resp = null;
+        $resp = false;
         $consulta = "UPDATE pasajero 
                     SET pdocumento = ".$this->getDocumento().", 
                     pnombre = '".$this->getNombre()."', 
@@ -159,11 +157,9 @@ class Pasajero{
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
@@ -174,17 +170,15 @@ class Pasajero{
     */
     public function eliminar(){
         $baseDatos = new BaseDatos();
-        $resp = null;
+        $resp = false;
         $consulta = "DELETE FROM pasajero WHERE pdocumento = ".$this->getDocumento();
         if($baseDatos->iniciar()){
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
@@ -193,7 +187,7 @@ class Pasajero{
     public function buscar($documento){
         $baseDatos = new BaseDatos();
 		$consulta="SELECT * FROM pasajero WHERE pdocumento = ".$documento;
-		$resp = null;
+		$resp = false;
 		if($baseDatos->iniciar()){
 			if($baseDatos->ejecutar($consulta)){
 				if($pasajero=$baseDatos->registro()){					
@@ -207,11 +201,9 @@ class Pasajero{
 					$resp= true;
 				}
 		 	}else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
 			}
 		 }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
 		 }		
 		 return $resp;

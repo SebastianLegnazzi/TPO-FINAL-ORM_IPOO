@@ -824,7 +824,6 @@ function opcionesViaje(){
             $resp = $objPasajero->buscar($dni);
             if($resp){
                 cambiarDatoPasajero($objPasajero);
-                echo "Los datos se han cambiado correctamente!"."\n";
             }else{
                 echo "El DNI del pasajero ingresado no existe!"."\n";
             }

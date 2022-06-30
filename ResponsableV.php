@@ -110,18 +110,16 @@ class ResponsableV{
     */
     public function insertar(){
         $baseDatos = new BaseDatos();
-        $resp = null;
+        $resp = false;
         $consulta = "INSERT INTO responsable (rnumerolicencia, rnombre, rapellido) 
                     VALUES (".$this->getNumLicencia().",'".$this->getNombre()."','".$this->getApellido()."')";
         if($baseDatos->iniciar()){
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
@@ -132,7 +130,7 @@ class ResponsableV{
     */
     public function modificar(){
         $baseDatos = new BaseDatos();
-        $resp = null;
+        $resp = false;
         $consulta = "UPDATE responsable 
                     SET rnumerolicencia = ".$this->getNumLicencia().", 
                     rnombre = '".$this->getNombre()."', 
@@ -141,11 +139,9 @@ class ResponsableV{
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
@@ -156,17 +152,15 @@ class ResponsableV{
     */
     public function eliminar(){
         $baseDatos = new BaseDatos();
-        $resp = null;
+        $resp = false;
         $consulta = "DELETE FROM responsable WHERE rnumeroempleado = ".$this->getNumEmpleado();
         if($baseDatos->iniciar()){
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
@@ -175,7 +169,7 @@ class ResponsableV{
     public function buscar($nroEmpleado){
         $baseDatos = new BaseDatos();
 		$consulta="SELECT * FROM responsable WHERE rnumeroempleado = ".$nroEmpleado;
-		$resp = null;
+		$resp = false;
 		if($baseDatos->iniciar()){
 			if($baseDatos->ejecutar($consulta)){
 				if($responsable=$baseDatos->registro()){					
@@ -186,11 +180,9 @@ class ResponsableV{
 					$resp= true;
 				}
 		 	}else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
 			}
 		 }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
 		 }		
 		 return $resp;

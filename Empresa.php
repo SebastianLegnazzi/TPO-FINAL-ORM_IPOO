@@ -91,18 +91,16 @@ class Empresa {
     */
     public function insertar(){
         $baseDatos = new BaseDatos();
-        $resp = null;
+        $resp = false;
         $consulta = "INSERT INTO empresa (enombre, edireccion) 
                     VALUES ('".$this->getNombre()."','".$this->getDireccion()."')";
         if($baseDatos->iniciar()){
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
@@ -113,7 +111,7 @@ class Empresa {
     */
     public function modificar(){
         $baseDatos = new BaseDatos();
-        $resp = null;
+        $resp = false;
         $consulta = "UPDATE empresa 
                     SET idempresa = ".$this->getIdentificacion().", 
                     enombre = '".$this->getNombre()."', 
@@ -122,11 +120,9 @@ class Empresa {
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
@@ -137,17 +133,15 @@ class Empresa {
     */
     public function eliminar(){
         $baseDatos = new BaseDatos();
-        $resp = null;
+        $resp = false;
         $consulta = "DELETE FROM empresa WHERE idempresa = ".$this->getIdentificacion();
         if($baseDatos->iniciar()){
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
@@ -156,7 +150,7 @@ class Empresa {
     public function buscar($idEmpresa){
         $baseDatos = new BaseDatos();
 		$consulta="SELECT * FROM empresa WHERE idempresa = ".$idEmpresa;
-		$resp = null;
+		$resp = false;
 		if($baseDatos->iniciar()){
 			if($baseDatos->ejecutar($consulta)){
 				while($empresa=$baseDatos->registro()){					
@@ -166,11 +160,9 @@ class Empresa {
 					$resp= true;
 				}
 		 	}else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
 			}
 		 }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
 		 }		
 		 return $resp;

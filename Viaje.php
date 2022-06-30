@@ -196,18 +196,16 @@ class Viaje{
     */
     public function insertar(){
         $baseDatos = new BaseDatos();
-        $resp = null;
+        $resp = false;
         $consulta = "INSERT INTO viaje (vdestino, vcantmaxpasajeros, idempresa, rnumeroempleado, vimporte, tipoAsiento, idayvuelta) 
                     VALUES ('".$this->getVDestino()."',".$this->getVCantidadMax().",".$this->getObjEmpresa()->getIdentificacion().",".$this->getObjResponsable()->getNumEmpleado().",".$this->getVImporte().",".$this->getTipoAsiento().",'".$this->getIdaVuelta()."')";
         if($baseDatos->iniciar()){
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
@@ -218,7 +216,7 @@ class Viaje{
     */
     public function modificar(){
         $baseDatos = new BaseDatos();
-        $resp = null;
+        $resp = false;
         $consulta = "UPDATE viaje 
                     SET idViaje = ".$this->getIdViaje().",
                     vdestino = '".$this->getVDestino()."', 
@@ -232,11 +230,9 @@ class Viaje{
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
@@ -247,17 +243,15 @@ class Viaje{
     */
     public function eliminar(){
         $baseDatos = new BaseDatos();
-        $resp = null;
+        $resp = false;
         $consulta = "DELETE FROM viaje WHERE idviaje = ".$this->getIdViaje();
         if($baseDatos->iniciar()){
             if($baseDatos->ejecutar($consulta)){
                 $resp = true;
             }else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
@@ -266,7 +260,7 @@ class Viaje{
     public function buscar($idViaje){
         $baseDatos = new BaseDatos();
 		$consulta="SELECT * FROM viaje WHERE idviaje = ".$idViaje;
-		$resp = null;
+		$resp = false;
 		if($baseDatos->iniciar()){
 			if($baseDatos->ejecutar($consulta)){
 				if($viaje=$baseDatos->registro()){
@@ -285,11 +279,9 @@ class Viaje{
 					$resp= true;
 				}
 		 	}else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
 			}
 		 }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
 		 }		
 		 return $resp;
@@ -323,7 +315,7 @@ class Viaje{
     */
     public function obtenerPasajeros(){
         $baseDatos = new BaseDatos();
-        $resp = null;
+        $resp = false;
         $consulta = "idViaje = ".$this->getIdViaje();
         if($baseDatos->iniciar()){
             $objPasajero = new Pasajero();
@@ -332,11 +324,9 @@ class Viaje{
                 $this->setArrayObjPasajero($arrayObjPersona);
                 $resp = true;
             }else{
-                $resp = false;
                 $this->setMensajeError($baseDatos->getERROR());
             }
         }else{
-            $resp = false;
             $this->setMensajeError($baseDatos->getERROR());
         }
         return $resp;
