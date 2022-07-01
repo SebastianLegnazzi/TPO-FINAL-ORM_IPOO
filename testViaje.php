@@ -298,12 +298,10 @@ function crearEmpresa(){
     if($resp){
         separador();
         echo "La empresa se inserto a la Base de Datos correctamente!"."\n";
-        $objEmpresa->buscar(count($objEmpresa->listar("")));
         separador();
     }else{
         separador();
         echo "No se pudo insertar la empresa a la Base de Datos por el siguiente error: "."\n".$objEmpresa->getMensajeError()."\n";
-        $objEmpresa = null;
         separador();
     }
 }
@@ -327,12 +325,10 @@ function crearResponsable(){
     if($resp){
         separador();
         echo "El responsable se inserto a la Base de Datos correctamente!"."\n";
-        $objResponsable->buscar(count($objResponsable->listar("")));
         separador();
     }else{
         separador();
         echo "No se pudo insertar el responsable a la Base de Datos por el siguiente error: "."\n".$objResponsable->getMensajeError()."\n";
-        $objResponsable = null;
         separador();
     }
 }
